@@ -1,0 +1,102 @@
+{
+  "_note": "4 shops, 10 kW, 7.20 L. Hour-by-hour greedy spends diesel at 12:00-13:00, the evening runs dry, and the low-value tea stall is starved.",
+  "grid_available": [
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    false,
+    false,
+    false
+  ],
+  "generator_capacity_kw": 10,
+  "fuel_budget_litres": 7.2,
+  "fuel_table": [
+    {
+      "load_kw": 4,
+      "litres_per_hour": 0.8
+    },
+    {
+      "load_kw": 7,
+      "litres_per_hour": 1.2
+    },
+    {
+      "load_kw": 10,
+      "litres_per_hour": 1.6
+    }
+  ],
+  "max_consecutive_dark": 2,
+  "shops": [
+    {
+      "id": "pharmacy",
+      "kw": 3,
+      "type": "mandatory",
+      "value_per_slot": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ]
+    },
+    {
+      "id": "restaurant",
+      "kw": 6,
+      "type": "normal",
+      "value_per_slot": [
+        2,
+        3,
+        9,
+        9,
+        6,
+        3,
+        3,
+        7,
+        9,
+        9
+      ]
+    },
+    {
+      "id": "mobile",
+      "kw": 3,
+      "type": "normal",
+      "value_per_slot": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        3,
+        4,
+        6,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "tea_stall",
+      "kw": 1,
+      "type": "normal",
+      "value_per_slot": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  ]
+}

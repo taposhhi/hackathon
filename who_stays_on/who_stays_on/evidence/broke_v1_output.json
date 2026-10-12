@@ -1,0 +1,147 @@
+{
+  "roster": [
+    {
+      "hour": 2,
+      "time": "12:00",
+      "powered": [
+        "pharmacy",
+        "restaurant",
+        "tea_stall"
+      ],
+      "dark": [
+        {
+          "id": "mobile",
+          "reason": "Capacity: 10 of 10 kW already used at 12:00; adding its 3 kW gives 13 kW > 10 kW. Its value now is 2; the plan keeps the shops that give more total value. [dark 1 h in a row, limit 2]"
+        }
+      ],
+      "load_kw": 10,
+      "capacity_kw": 10,
+      "fuel_litres": 1.6,
+      "fuel_cumulative_litres": 1.6
+    },
+    {
+      "hour": 3,
+      "time": "13:00",
+      "powered": [
+        "pharmacy",
+        "restaurant",
+        "tea_stall"
+      ],
+      "dark": [
+        {
+          "id": "mobile",
+          "reason": "Capacity: 10 of 10 kW already used at 13:00; adding its 3 kW gives 13 kW > 10 kW. Its value now is 2; the plan keeps the shops that give more total value. [dark 2 h in a row, limit 2]"
+        }
+      ],
+      "load_kw": 10,
+      "capacity_kw": 10,
+      "fuel_litres": 1.6,
+      "fuel_cumulative_litres": 3.2
+    },
+    {
+      "hour": 4,
+      "time": "14:00",
+      "powered": [
+        "pharmacy",
+        "restaurant",
+        "tea_stall"
+      ],
+      "dark": [
+        {
+          "id": "mobile",
+          "reason": "Capacity: 10 of 10 kW already used at 14:00; adding its 3 kW gives 13 kW > 10 kW. Its value now is 2; the plan keeps the shops that give more total value. [dark 3 h in a row, limit 2]"
+        }
+      ],
+      "load_kw": 10,
+      "capacity_kw": 10,
+      "fuel_litres": 1.6,
+      "fuel_cumulative_litres": 4.8
+    },
+    {
+      "hour": 7,
+      "time": "17:00",
+      "powered": [
+        "pharmacy",
+        "restaurant",
+        "tea_stall"
+      ],
+      "dark": [
+        {
+          "id": "mobile",
+          "reason": "Capacity: 10 of 10 kW already used at 17:00; adding its 3 kW gives 13 kW > 10 kW. Its value now is 6; the plan keeps the shops that give more total value. [dark 1 h in a row, limit 2]"
+        }
+      ],
+      "load_kw": 10,
+      "capacity_kw": 10,
+      "fuel_litres": 1.6,
+      "fuel_cumulative_litres": 6.4
+    },
+    {
+      "hour": 8,
+      "time": "18:00",
+      "powered": [
+        "pharmacy",
+        "tea_stall"
+      ],
+      "dark": [
+        {
+          "id": "restaurant",
+          "reason": "Fuel: adding it at 18:00 raises the hour from 0.80 L to 1.60 L (+0.80 L), taking the day to 8.80 L of 7.20 L budget. That diesel is worth more in other hours (its value now: 9). [dark 1 h in a row, limit 2]"
+        },
+        {
+          "id": "mobile",
+          "reason": "Fuel: adding it at 18:00 raises the hour from 0.80 L to 1.20 L (+0.40 L), taking the day to 8.40 L of 7.20 L budget. That diesel is worth more in other hours (its value now: 8). [dark 2 h in a row, limit 2]"
+        }
+      ],
+      "load_kw": 4,
+      "capacity_kw": 10,
+      "fuel_litres": 0.8,
+      "fuel_cumulative_litres": 7.2
+    },
+    {
+      "hour": 9,
+      "time": "19:00",
+      "powered": [
+        "pharmacy"
+      ],
+      "dark": [
+        {
+          "id": "restaurant",
+          "reason": "Fuel: adding it at 19:00 raises the hour from 0.80 L to 1.60 L (+0.80 L), taking the day to 8.80 L of 7.20 L budget. That diesel is worth more in other hours (its value now: 9). [dark 2 h in a row, limit 2]"
+        },
+        {
+          "id": "mobile",
+          "reason": "Fuel: adding it at 19:00 raises the hour from 0.80 L to 1.20 L (+0.40 L), taking the day to 8.40 L of 7.20 L budget. That diesel is worth more in other hours (its value now: 8). [dark 3 h in a row, limit 2]"
+        },
+        {
+          "id": "tea_stall",
+          "reason": "Fuel: adding it at 19:00 raises the hour from 0.80 L to 0.80 L (+0.00 L), taking the day to 8.00 L of 7.20 L budget. That diesel is worth more in other hours (its value now: 1). [dark 1 h in a row, limit 2]"
+        }
+      ],
+      "load_kw": 3,
+      "capacity_kw": 10,
+      "fuel_litres": 0.8,
+      "fuel_cumulative_litres": 8.0
+    }
+  ],
+  "value_total": 66,
+  "fuel_total_litres": 8.0,
+  "dark_hours": {
+    "pharmacy": 0,
+    "restaurant": 2,
+    "mobile": 6,
+    "tea_stall": 1
+  },
+  "capacity_kw": 10,
+  "fuel_budget_litres": 7.2,
+  "max_consecutive_dark": 2,
+  "outage_hours": [
+    2,
+    3,
+    4,
+    7,
+    8,
+    9
+  ],
+  "status": "ok"
+}

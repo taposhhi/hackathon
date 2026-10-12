@@ -1,0 +1,4 @@
+INVALID
+ - hour 4: mobile dark 3 h in a row (limit 2)
+ - hour 9: mobile dark 3 h in a row (limit 2)
+ - fuel 8.00 L > budget 7.20 L

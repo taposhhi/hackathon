@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who Stays On? Generator roster</title>
+<style>
+  :root {
+    --ink: #17232d; --muted: #5d6b77; --line: #c9d1d8; --paper: #eceff2; --panel: #ffffff;
+    --on: #1b7f55; --on-bg: #d6efe2; --dark: #a8231a; --dark-bg: #f8d9d5;
+    --grid-bg: #e1e5e9; --amber: #d99a00; --amber-bg: #fff1c9; --focus: #0b57d0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #e6ecf1; --muted: #9aa8b4; --line: #3a4753; --paper: #11181e; --panel: #19232b;
+      --on: #5fd29c; --on-bg: #17392a; --dark: #ff9d93; --dark-bg: #43201d;
+      --grid-bg: #26313a; --amber: #f0b429; --amber-bg: #3a2f10; --focus: #8ab4f8;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink);
+         font: 15px/1.45 "Segoe UI", system-ui, -apple-system, "Noto Sans", Arial, sans-serif; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 18px 16px 40px; }
+  h1 { font-size: 26px; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 16px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; margin-bottom: 14px; }
+  textarea { width: 100%; min-height: 120px; font: 12.5px/1.4 ui-monospace, Consolas, monospace;
+             background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 8px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+  button, .filebtn { font: inherit; padding: 7px 12px; border-radius: 4px; border: 1px solid var(--line);
+                     background: var(--panel); color: var(--ink); cursor: pointer; }
+  button.primary { background: var(--ink); color: var(--panel); border-color: var(--ink); font-weight: 600; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  input[type=file] { display: none; }
+  .banner { border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; border: 1px solid; }
+  .banner.err { background: var(--dark-bg); border-color: var(--dark); color: var(--ink); }
+  .banner.warn { background: var(--amber-bg); border-color: var(--amber); }
+  .banner ul { margin: 6px 0 0 18px; padding: 0; }
+  .summary { display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: baseline; }
+  .summary .k { color: var(--muted); font-size: 13px; }
+  .summary .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .chip { display: inline-block; padding: 2px 10px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+  .chip.ok { background: var(--on-bg); color: var(--on); }
+  .chip.infeasible { background: var(--amber-bg); color: var(--ink); border: 1px solid var(--amber); }
+  .scroll { overflow-x: auto; }
+  table.board { border-collapse: collapse; width: 100%; min-width: 860px; font-variant-numeric: tabular-nums; }
+  .board th, .board td { border: 1px solid var(--line); padding: 0; text-align: center; height: 34px; }
+  .board th { background: var(--panel); font-weight: 600; font-size: 13px; padding: 4px 6px; }
+  .board th.name, .board td.name { text-align: left; padding: 4px 10px; min-width: 150px; position: sticky; left: 0; background: var(--panel); z-index: 1; }
+  .board td.name small { color: var(--muted); font-weight: 400; margin-left: 6px; }
+  .star { color: var(--amber); font-weight: 700; margin-left: 4px; }
+  .board td.grid { background: var(--grid-bg); color: var(--muted); font-size: 12px;
+                   background-image: repeating-linear-gradient(135deg, transparent 0 6px, rgba(120,130,140,.18) 6px 7px); }
+  .cell { display: block; width: 100%; height: 100%; min-height: 34px; border: 0; border-radius: 0; font-size: 17px; font-weight: 700; }
+  .cell.on { background: var(--on-bg); color: var(--on); cursor: default; }
+  .cell.off { background: var(--dark-bg); color: var(--dark); }
+  .cell.sel { outline: 3px solid var(--focus); outline-offset: -3px; }
+  .board td.dh { min-width: 64px; font-weight: 600; padding: 0 8px; }
+  .board tfoot td, .board tfoot th { background: var(--panel); font-size: 13px; height: 40px; }
+  .board tfoot th.name { font-weight: 600; }
+  .meter { position: relative; height: 100%; min-height: 40px; display: flex; align-items: center; justify-content: center; }
+  .meter i { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--amber); }
+  .meter i.full { background: var(--dark); }
+  .meter span { position: relative; }
+  .why { margin-top: 12px; min-height: 44px; padding: 10px 12px; border-left: 4px solid var(--dark); background: var(--paper); border-radius: 0 4px 4px 0; }
+  .why.idle { border-left-color: var(--line); color: var(--muted); }
+  details.list { margin-top: 12px; }
+  details.list summary { cursor: pointer; font-weight: 600; }
+  .shopwhy { margin: 10px 0 0; }
+  .shopwhy h3 { font-size: 14px; margin: 0 0 4px; }
+  .shopwhy ul { margin: 0; padding-left: 18px; }
+  .shopwhy li { margin: 2px 0; }
+  .legend { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .printonly { display: none; }
+  @media (max-width: 700px) { h1 { font-size: 21px; } }
+
+  @media print {
+    @page { size: A4 landscape; margin: 8mm; }
+    body { background: #fff; color: #000; font-size: 9pt; }
+    .wrap { max-width: none; padding: 0; }
+    .noprint, .why, details.list, .banner.err { display: none !important; }
+    .printonly { display: block; }
+    .panel { border: 0; padding: 0; margin: 0 0 4mm; }
+    .scroll { overflow: visible; }
+    table.board { min-width: 0; }
+    .board th, .board td { height: 7mm; }
+    .board th.name, .board td.name { position: static; }
+    .cell { min-height: 7mm; font-size: 11pt; }
+    .cell.sel { outline: none; }
+    .meter, .board tfoot td, .board tfoot th { height: 8mm; min-height: 0; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    :root { --ink:#000; --muted:#444; --line:#777; --panel:#fff; --paper:#fff; --on:#0b5c3a; --on-bg:#d6efe2;
+            --dark:#8f1c14; --dark-bg:#f8d9d5; --grid-bg:#e4e4e4; --amber:#b57f00; --amber-bg:#fff1c9; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="noprint">
+    <h1>Who stays on?</h1>
+    <p class="sub">Load the day's situation, get the roster for every outage hour, and print it for the generator room door.</p>
+  </header>
+
+  <section class="panel noprint" aria-label="Input">
+    <label for="input"><strong>Input JSON</strong> (paste, or upload a file)</label>
+    <textarea id="input" spellcheck="false" placeholder='{"grid_available": [...], "generator_capacity_kw": 20, ...}'></textarea>
+    <div class="bar">
+      <button class="primary" id="runBtn">Make roster</button>
+      <label class="filebtn" for="file" tabindex="0" id="fileLabel">Upload JSON file</label>
+      <input type="file" id="file" accept=".json,application/json">
+      <button id="sampleBtn">Load sample</button>
+      <button id="dlBtn" disabled>Download output JSON</button>
+      <button id="printBtn" disabled>Print view (A4)</button>
+    </div>
+  </section>
+
+  <div id="msg"></div>
+
+  <div id="result" hidden>
+    <section class="panel" aria-label="Summary">
+      <div class="printonly" style="font-size:14pt;font-weight:700;margin-bottom:2mm">Generator roster for today</div>
+      <div class="summary" id="summary"></div>
+    </section>
+
+    <section class="panel" aria-label="Roster board">
+      <div class="scroll"><table class="board" id="board"></table></div>
+      <div class="legend">&#10003; powered &nbsp; &#10007; dark &nbsp; grid = grid power, nothing to decide &nbsp; <span class="star">&#9733;</span> mandatory, always on in an outage
+        <span class="noprint"> &nbsp; Click or tab to a &#10007; to read why.</span></div>
+      <div class="why idle noprint" id="why" aria-live="polite">Select a &#10007; cell to see the reason it is dark.</div>
+      <details class="list" id="reasonList"><summary>All reasons, by shop</summary><div id="reasonBody"></div></details>
+    </section>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+let lastOutput = null, lastInput = null;
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const L = x => Number(x).toFixed(2);
+const HOURS = Array.from({length: 10}, (_, i) => String(10 + i).padStart(2, '0') + ':00');
+
+async function makeRoster() {
+  const text = $('input').value;
+  $('msg').innerHTML = '';
+  let res, out;
+  try {
+    res = await fetch('/api/roster', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: text});
+    out = await res.json();
+  } catch (e) {
+    showError('Could not reach /api/roster: ' + e.message);
+    return;
+  }
+  lastOutput = out;
+  $('dlBtn').disabled = false;
+  if (out.status === 'invalid_input') {
+    $('result').hidden = true; $('printBtn').disabled = true;
+    showError('Invalid input. ' + out.message);
+    return;
+  }
+  try { lastInput = JSON.parse(text); } catch (e) { showError('Input is not valid JSON.'); return; }
+  render(out);
+}
+
+function showError(text) {
+  $('msg').innerHTML = '<div class="banner err" role="alert"><strong>' + esc(text) + '</strong></div>';
+}
+
+function render(out) {
+  const inp = lastInput;
+  const infeasible = out.status === 'infeasible';
+  const plan = infeasible ? out.best_effort : out;
+  let banner = '';
+  if (infeasible) {
+    banner += '<div class="banner warn"><strong>No roster can satisfy every rule.</strong><ul>' +
+      (out.conflicts || []).map(c => '<li>' + esc(c.message) +
+        (c.times && c.times.length ? ' <em>(' + esc(c.shops.join(', ') || 'all') + '; ' + esc(c.times.join(', ')) + ')</em>' : '') + '</li>').join('') + '</ul>' +
+      (plan ? '<p style="margin:8px 0 0"><strong>' + esc(plan.label) + '.</strong> Shops over the dark limit: ' +
+        esc((plan.dark_run_violations || []).map(v => v.id + ' at ' + v.hours_over_limit.join(', ')).join('; ') || 'none') + '.</p>'
+        : '<p style="margin:8px 0 0">No best-effort roster is possible.</p>') + '</div>';
+  }
+  $('msg').innerHTML = banner;
+  $('result').hidden = false;
+  $('printBtn').disabled = !plan;
+
+  const shops = inp.shops, grid = inp.grid_available;
+  const budget = Number(inp.fuel_budget_litres), cap = Number(inp.generator_capacity_kw);
+  const byHour = {};
+  if (plan) plan.roster.forEach(e => byHour[e.hour] = e);
+
+  // summary
+  const dark = plan ? plan.dark_hours : {};
+  const darkTxt = Object.keys(dark).filter(k => dark[k] > 0).map(k => esc(k) + ' ' + dark[k]).join(', ') || 'none';
+  $('summary').innerHTML =
+    '<div><div class="k">Status</div><span class="chip ' + (infeasible ? 'infeasible' : 'ok') + '">' + (infeasible ? 'infeasible' : 'ok') + '</span></div>' +
+    '<div><div class="k">Total value' + (infeasible && plan ? ' (best effort)' : '') + '</div><div class="v">' + (plan ? plan.value_total : '-') + '</div></div>' +
+    '<div><div class="k">Diesel used</div><div class="v">' + (plan ? L(plan.fuel_total_litres) : '-') + ' <span class="k">of ' + L(budget) + ' L</span></div></div>' +
+    '<div style="flex:1 1 320px"><div class="k">Dark hours by shop</div><div>' + darkTxt + '</div></div>';
+
+  // board
+  let h = '<thead><tr><th class="name">Shop</th>' + HOURS.map(t => '<th>' + t + '</th>').join('') + '<th>Dark h</th></tr></thead><tbody>';
+  const reasons = {};
+  shops.forEach(s => {
+    h += '<tr><td class="name">' + esc(s.id) + (s.type === 'mandatory' ? '<span class="star" title="mandatory">&#9733;</span>' : '') +
+         '<small>' + s.kw + ' kW</small></td>';
+    for (let t = 0; t < 10; t++) {
+      if (grid[t]) { h += '<td class="grid">grid</td>'; continue; }
+      const e = byHour[t];
+      if (!e) { h += '<td>-</td>'; continue; }
+      if (e.powered.includes(s.id)) {
+        h += '<td><span class="cell on" aria-label="' + esc(s.id) + ' powered at ' + HOURS[t] + '">&#10003;</span></td>';
+      } else {
+        const d = e.dark.find(x => x.id === s.id);
+        const r = d ? d.reason : '';
+        (reasons[s.id] = reasons[s.id] || []).push({t, r});
+        h += '<td><button class="cell off" data-s="' + esc(s.id) + '" data-t="' + t + '" title="' + esc(r) + '" aria-label="' + esc(s.id) + ' dark at ' + HOURS[t] + '. ' + esc(r) + '">&#10007;</button></td>';
+      }
+    }
+    h += '<td class="dh">' + (plan ? (plan.dark_hours[s.id] ?? 0) : '-') + '</td></tr>';
+  });
+  h += '</tbody><tfoot>';
+  h += '<tr><th class="name">Load / capacity (kW)</th>';
+  for (let t = 0; t < 10; t++) {
+    const e = byHour[t];
+    if (grid[t]) h += '<td class="grid">grid</td>';
+    else if (!e) h += '<td>-</td>';
+    else h += '<td><div class="meter"><i class="' + (e.load_kw >= cap ? 'full' : '') + '" style="width:' + Math.min(100, 100 * e.load_kw / cap) + '%"></i><span>' + e.load_kw + ' / ' + cap + '</span></div></td>';
+  }
+  h += '<td></td></tr>';
+  h += '<tr><th class="name">Fuel this hour (L)</th>';
+  for (let t = 0; t < 10; t++) {
+    const e = byHour[t];
+    h += grid[t] ? '<td class="grid">grid</td>' : (e ? '<td>' + L(e.fuel_litres) + '</td>' : '<td>-</td>');
+  }
+  h += '<td>' + (plan ? '<strong>' + L(plan.fuel_total_litres) + '</strong>' : '') + '</td></tr>';
+  h += '<tr><th class="name">Running total / budget (L)</th>';
+  for (let t = 0; t < 10; t++) {
+    const e = byHour[t];
+    if (grid[t]) h += '<td class="grid">grid</td>';
+    else if (!e) h += '<td>-</td>';
+    else h += '<td><div class="meter"><i class="' + (e.fuel_cumulative_litres >= budget ? 'full' : '') + '" style="width:' + Math.min(100, 100 * e.fuel_cumulative_litres / (budget || 1)) + '%"></i><span>' + L(e.fuel_cumulative_litres) + ' / ' + L(budget) + '</span></div></td>';
+  }
+  h += '<td></td></tr></tfoot>';
+  $('board').innerHTML = h;
+
+  // reasons list
+  $('reasonBody').innerHTML = Object.keys(reasons).map(id =>
+    '<div class="shopwhy"><h3>' + esc(id) + '</h3><ul>' + reasons[id].map(x => '<li><strong>' + HOURS[x.t] + '</strong> ' + esc(x.r) + '</li>').join('') + '</ul></div>').join('') ||
+    '<p>Nothing is dark.</p>';
+  const why = $('why');
+  why.className = 'why idle'; why.textContent = 'Select a \u2717 cell to see the reason it is dark.';
+  $('board').querySelectorAll('.cell.off').forEach(b => b.addEventListener('click', () => {
+    $('board').querySelectorAll('.cell.sel').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+    why.className = 'why';
+    why.innerHTML = '<strong>' + esc(b.dataset.s) + ' at ' + HOURS[b.dataset.t] + ':</strong> ' + esc(b.title);
+  }));
+}
+
+$('runBtn').addEventListener('click', makeRoster);
+$('file').addEventListener('change', async ev => {
+  const f = ev.target.files[0];
+  if (!f) return;
+  $('input').value = await f.text();
+  ev.target.value = '';
+  makeRoster();
+});
+$('fileLabel').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file').click(); } });
+$('sampleBtn').addEventListener('click', async () => {
+  try {
+    $('input').value = await (await fetch('/sample_input.json')).text();
+    makeRoster();
+  } catch (e) { showError('Could not load the sample: ' + e.message); }
+});
+$('dlBtn').addEventListener('click', () => {
+  if (!lastOutput) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(lastOutput, null, 2)], {type: 'application/json'}));
+  a.download = 'roster_output.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+$('printBtn').addEventListener('click', () => window.print());
+</script>
+</body>
+</html>
